@@ -6,3 +6,13 @@
 //
 
 import Foundation
+
+struct APIService {
+    
+    static let baseURL = "https://admin-cp.rimashaar.com/api/v1"
+    
+    static func registerUser() {}
+    
+    static func verifyOTP() {}
+    
+}
