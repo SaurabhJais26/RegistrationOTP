@@ -12,6 +12,11 @@ struct ContentView: View {
     @State private var lastName = ""
     @State private var phoneOrEmail = ""
     
+    @State private var userID: Int?
+    @State private var showOTPView = false
+    @State private var errorMessage: String?
+    
+    
     var body: some View {
         VStack {
             
@@ -77,6 +82,7 @@ struct ContentView: View {
             
             Button {
                 print("Get OTP Pressed")
+                registerUser()
             } label: {
                 Text("GET OTP")
                     .font(.headline)
@@ -87,6 +93,10 @@ struct ContentView: View {
                     .cornerRadius(10)
             }
             .padding(.horizontal)
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+            }
             
             HStack {
                 Rectangle()
@@ -133,8 +143,30 @@ struct ContentView: View {
             
         }
         .padding(.top, 20)
+        .fullScreenCover(isPresented: $showOTPView) {
+            if let userID = userID {
+                OTPView(userId: userID)
+            }
+        }
+    }
+    
+    private func registerUser() {
+        APIService.registerUser(firstName: firstName, lastName: lastName, email: phoneOrEmail, phone: phoneOrEmail) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let userID):
+                    self.userID = userID
+                    self.showOTPView = true
+                    
+                case.failure(let error):
+                    self.errorMessage = error.localizedDescription
+                }
+            }
+        }
     }
 }
+
+
 
 #Preview {
     ContentView()
