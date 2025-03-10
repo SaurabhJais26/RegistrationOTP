@@ -96,6 +96,9 @@ struct ContentView: View {
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
+                    .font(.callout)
+                    .multilineTextAlignment(.center)
+                    .padding()
             }
             
             HStack {
@@ -143,10 +146,11 @@ struct ContentView: View {
             
         }
         .padding(.top, 20)
-        .fullScreenCover(isPresented: $showOTPView) {
-            if let userID = userID {
-                OTPView(userId: userID)
-            }
+        .fullScreenCover(isPresented: Binding(
+            get: { showOTPView && userID != nil },
+            set: { _ in showOTPView = false }
+        )) {
+            OTPView(userId: userID ?? 0)
         }
     }
     
@@ -155,11 +159,15 @@ struct ContentView: View {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let userID):
+                    print("✅ Successfully registered. User ID: \(userID)")
                     self.userID = userID
                     self.showOTPView = true
+                    print("🔄 Navigating to OTPView, showOTPView: \(self.showOTPView)")
                     
                 case.failure(let error):
-                    self.errorMessage = error.localizedDescription
+                    
+                    print("❌ Registration failed: \(error.localizedDescription)")
+                    self.errorMessage = "⚠️ Registration failed: \(error.localizedDescription). Please try again."
                 }
             }
         }

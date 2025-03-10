@@ -86,6 +86,9 @@ struct OTPView: View {
             if let errorMessage = errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
+                    .font(.callout)
+                    .multilineTextAlignment(.center)
+                    .padding()
             }
             
             Spacer()
@@ -93,8 +96,10 @@ struct OTPView: View {
         .padding()
         .fullScreenCover(isPresented: $showSuccessScreen) {
             // Navigate to success screen here
+            WelcomeView()
         }
         .onAppear {
+            print("📩 OTPView Appeared for User ID: \(userId)")
             focusedField = 0
             startTimer()
         }
@@ -102,12 +107,19 @@ struct OTPView: View {
     
     // Move focus to the next field or previous field
     private func moveToNextField(from index: Int, value: String) {
-        if value.count == 1 && index < 4 {
-            focusedField = index + 1
-        } else if value.isEmpty && index > 0 {
-            focusedField = index - 1
+        if !value.isEmpty {
+            if index < 4 {
+                focusedField = index + 1 
+            }
+        } else {
+            if index > 0 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    focusedField = index - 1
+                }
+            }
         }
     }
+
     
     private func verifyOTP() {
         let enteredOTP = otpDigits.joined()
@@ -122,7 +134,8 @@ struct OTPView: View {
                 case .success:
                     showSuccessScreen = true
                 case .failure(let error):
-                    errorMessage = error.localizedDescription
+                    errorMessage = "❌ Incorrect OTP. Please try again."
+                    showSuccessScreen = false
                 }
             }
         }
